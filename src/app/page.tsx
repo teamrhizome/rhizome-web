@@ -1,17 +1,35 @@
 import Image from "next/image";
+import Link from "next/link";
+import ClientMemoGraph from "@/components/ClientMemoGraph";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
+    <div className="grid grid-rows-[auto_1fr_auto] items-center justify-items-center min-h-screen p-8 pb-20 gap-8 sm:p-12 font-[family-name:var(--font-geist-sans)]">
+      <header className="w-full flex flex-col items-center gap-4">
+        <div className="flex items-center justify-between w-full max-w-4xl">
+          <Image
+            className="dark:invert"
+            src="/next.svg"
+            alt="Next.js logo"
+            width={120}
+            height={25}
+            priority
+          />
+          <Link 
+            href="/memo" 
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+          >
+            메모장 열기
+          </Link>
+        </div>
+        <h1 className="text-2xl font-bold text-center">메모 그래프 뷰</h1>
+        <p className="text-gray-600 dark:text-gray-400 text-center max-w-2xl">
+          메모들 간의 연결을 시각화한 그래프입니다. 메모에서 [[제목]] 형태로 다른 메모를 참조하면 연결이 생성됩니다.
+        </p>
+      </header>
+
+      <main className="flex flex-col gap-[32px] w-full max-w-4xl items-center">
+        <ClientMemoGraph />
         <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
           <li className="mb-2 tracking-[-.01em]">
             Get started by editing{" "}
