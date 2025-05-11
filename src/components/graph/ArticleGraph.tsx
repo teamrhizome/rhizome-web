@@ -17,23 +17,7 @@ interface ArticleGraphProps {
   onNodeClick: (article: Article | null) => void;
 }
 
-interface GraphNode {
-  id: string;
-  articleId: string;
-  title: string;
-  val: number;
-}
-
-interface GraphLink {
-  source: string;
-  target: string;
-}
-
-interface GraphData {
-  nodes: GraphNode[];
-  links: GraphLink[];
-}
-
+import { GraphNode, GraphLink, GraphData } from '@/types/article';
 export default function ArticleGraph({ articles, onNodeClick }: ArticleGraphProps) {
   const [graphData, setGraphData] = useState<GraphData>({ nodes: [], links: [] });
   const [isStabilized, setIsStabilized] = useState<boolean>(false);
