@@ -1,95 +1,74 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, MutableRefObject } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { ForceGraphMethods } from 'react-force-graph-2d';
 import { Article } from '@/types/article';
+import { articleApi } from '@/api/article';
 
 // Dynamically import ForceGraph2D with no SSR to avoid server-side rendering issues
 const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), {
   ssr: false,
   loading: () => <div className="w-full h-[500px] flex items-center justify-center text-foreground/60">그래프 로딩 중...</div>
-});
+}) as any;
 
 interface ArticleGraphProps {
-  articles: Article[];
   onNodeClick: (article: Article | null) => void;
 }
 
 import { GraphNode, GraphLink, GraphData } from '@/types/article';
-export default function ArticleGraph({ articles, onNodeClick }: ArticleGraphProps) {
+export default function ArticleGraph({ onNodeClick }: ArticleGraphProps) {
   const [graphData, setGraphData] = useState<GraphData>({ nodes: [], links: [] });
   const [isStabilized, setIsStabilized] = useState<boolean>(false);
-  const graphRef = useRef<ForceGraphMethods>(null);
+  const graphRef = useRef<ForceGraphMethods<{ id: string; articleId: string; title: string; val: number; color: string; x?: number; y?: number; vx?: number; vy?: number; fx?: number; fy?: number; }, GraphLink>>(null) as MutableRefObject<ForceGraphMethods<{ id: string; articleId: string; title: string; val: number; color: string; x?: number; y?: number; vx?: number; vy?: number; fx?: number; fy?: number; }, GraphLink>>;
   const prevGraphDataJsonRef = useRef<string>('');
 
   // Convert articles to graph data
   useEffect(() => {
-    const updateGraphData = () => {
-      if (articles.length === 0) return;
-
-      const newGraphData: GraphData = {
-        nodes: articles.map(article => ({
-          id: article.id,
-          articleId: article.articleId,
+    const updateGraphData = async () => {
+      try {
+        const response = await articleApi.getArticles();
+        const articles = response.data.articles.map(article => ({
+          id: article.id.toString(),
+          articleId: article.id.toString(),
           title: article.title,
-          val: 1
-        })),
-        links: articles.flatMap(article =>
-          article.relatedArticles.map(relatedId => ({
-            source: article.id,
-            target: articles.find(a => a.articleId === relatedId)?.id || ''
-          }))
-        ).filter(link => link.target !== '')
-      };
+          content: article.content,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          relatedArticles: article.relateArticles.map(ref => ref.id.toString())
+        }));
 
-      const newGraphDataJson = JSON.stringify(newGraphData);
+        const newGraphData: GraphData = {
+          nodes: articles.map(article => ({
+            id: article.id,
+            articleId: article.articleId,
+            title: article.title,
+            val: 1,
+            color: '#6366f1'
+          })),
+          links: articles.flatMap(article =>
+            article.relatedArticles.map(relatedId => ({
+              source: article.id,
+              target: articles.find(a => a.articleId === relatedId)?.id || ''
+            }))
+          ).filter(link => link.target !== '')
+        };
 
-      if (prevGraphDataJsonRef.current !== newGraphDataJson) {
-        prevGraphDataJsonRef.current = newGraphDataJson;
-        setGraphData(newGraphData);
-        setIsStabilized(false);
+        const newGraphDataJson = JSON.stringify(newGraphData);
+
+        if (prevGraphDataJsonRef.current !== newGraphDataJson) {
+          prevGraphDataJsonRef.current = newGraphDataJson;
+          setGraphData(newGraphData);
+          setIsStabilized(false);
+        }
+      } catch (error) {
+        console.error('Failed to fetch articles:', error);
       }
     };
 
     updateGraphData();
-
-    // localStorage 변경사항 감지
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'articles') {
-        try {
-          const newArticles = JSON.parse(e.newValue || '[]');
-          const newGraphData: GraphData = {
-            nodes: newArticles.map((article: Article) => ({
-              id: article.id,
-              articleId: article.articleId,
-              title: article.title,
-              val: 1
-            })),
-            links: newArticles.flatMap((article: Article) =>
-              article.relatedArticles.map((relatedId: string) => ({
-                source: article.id,
-                target: newArticles.find((a: Article) => a.articleId === relatedId)?.id || ''
-              }))
-            ).filter((link: GraphLink) => link.target !== '')
-          };
-
-          const newGraphDataJson = JSON.stringify(newGraphData);
-          if (prevGraphDataJsonRef.current !== newGraphDataJson) {
-            prevGraphDataJsonRef.current = newGraphDataJson;
-            setGraphData(newGraphData);
-            setIsStabilized(false);
-          }
-        } catch (error) {
-          console.error('Failed to parse articles from localStorage:', error);
-        }
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, [articles]);
+  }, []);
 
   // Stabilize the graph after it's rendered
   useEffect(() => {
@@ -113,9 +92,17 @@ export default function ArticleGraph({ articles, onNodeClick }: ArticleGraphProp
     }
   }, [graphData, isStabilized]);
 
-  const handleNodeClick = (node: GraphNode) => {
-    const article = articles.find(a => a.id === node.id);
-    onNodeClick(article || null);
+  const handleNodeClick = (node: any, event: MouseEvent) => {
+    const article: Article = {
+      id: node.id,
+      articleId: node.articleId,
+      title: node.title,
+      content: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      relatedArticles: []
+    };
+    onNodeClick(article);
   };
 
   return (

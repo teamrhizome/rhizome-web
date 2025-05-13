@@ -4,27 +4,32 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Article } from '@/types/article';
 import ArticleGraph from '@/components/graph/ArticleGraph';
+import { articleApi } from '@/api/article';
 
 export default function Home() {
   const router = useRouter();
   const [articles, setArticles] = useState<Article[]>([]);
 
   useEffect(() => {
-    const loadArticles = () => {
-      const savedArticles = localStorage.getItem('articles');
-      if (savedArticles) {
-        try {
-          const parsedArticles = JSON.parse(savedArticles);
-          setArticles(parsedArticles);
-        } catch (error) {
-          console.error('Failed to parse articles from localStorage:', error);
-        }
+    const loadArticles = async () => {
+      try {
+        const response = await articleApi.getArticles();
+        const mappedArticles = response.data.articles.map(article => ({
+          id: article.id.toString(),
+          articleId: article.id.toString(),
+          title: article.title,
+          content: article.content,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          relatedArticles: article.relateArticles.map(ref => ref.id.toString())
+        }));
+        setArticles(mappedArticles);
+      } catch (error) {
+        console.error('Failed to fetch articles:', error);
       }
     };
 
     loadArticles();
-    window.addEventListener('storage', loadArticles);
-    return () => window.removeEventListener('storage', loadArticles);
   }, []);
 
   const handleNodeClick = (article: Article | null) => {
@@ -45,7 +50,7 @@ export default function Home() {
             게시글 작성
           </button>
         </div>
-        <ArticleGraph articles={articles} onNodeClick={handleNodeClick} />
+        <ArticleGraph onNodeClick={handleNodeClick} />
       </div>
     </main>
   );

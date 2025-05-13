@@ -14,6 +14,13 @@ export interface GraphNode {
   title: string;
   val: number;
   color: string;
+  x?: number;
+  y?: number;
+  vx?: number;
+  vy?: number;
+  fx?: number;
+  fy?: number;
+  [key: string]: any;
 }
 
 export interface GraphLink {
@@ -24,4 +31,52 @@ export interface GraphLink {
 export interface GraphData {
   nodes: GraphNode[];
   links: GraphLink[];
+}
+
+export interface CreateArticleRequest {
+  title: string;
+  content: string;
+  relateArticleIds: {
+    articleIds: number[];
+  };
+}
+
+export interface ReferenceArticleResponse {
+  id: number;
+  title: string;
+}
+
+export interface ArticleResponse {
+  id: number;
+  title: string;
+  content: string;
+  relateArticles: ReferenceArticleResponse[];
+}
+
+export interface AllArticleResponse {
+  result: 'SUCCESS' | 'FAIL';
+  data: {
+    articles: ArticleResponse[];
+  };
+  error: null | {
+    code: string;
+    message: string;
+    data: Record<string, unknown>;
+  };
+}
+
+export interface ArticleDetailResponse {
+  result: 'SUCCESS' | 'FAIL';
+  data: {
+    id: number;
+    title: string;
+    content: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  error: null | {
+    code: string;
+    message: string;
+    data: Record<string, unknown>;
+  };
 } 
