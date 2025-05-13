@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Article } from '@/types/article';
+import { articleApi } from '@/api/article';
+import { ArticleDetailResponse } from '@/types/article';
 
 interface Props {
   id: string;
@@ -10,22 +11,29 @@ interface Props {
 
 export default function ViewArticleClient({ id }: Props) {
   const router = useRouter();
-  const [article, setArticle] = useState<Article | null>(null);
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [article, setArticle] = useState<ArticleDetailResponse['data'] | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedArticles = localStorage.getItem('articles');
-    if (savedArticles) {
+    const fetchArticle = async () => {
       try {
-        const parsedArticles = JSON.parse(savedArticles);
-        setArticles(parsedArticles);
-        const foundArticle = parsedArticles.find((a: Article) => a.id === id);
-        setArticle(foundArticle || null);
+        const response = await articleApi.getArticle(id);
+        if (response.result === 'SUCCESS') {
+          setArticle(response.data);
+        }
       } catch (error) {
-        console.error('Failed to parse articles from localStorage:', error);
+        console.error('Failed to fetch article:', error);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
+    fetchArticle();
   }, [id]);
+
+  if (loading) {
+    return <div className="p-4">로딩 중...</div>;
+  }
 
   if (!article) {
     return (
@@ -62,31 +70,15 @@ export default function ViewArticleClient({ id }: Props) {
         </div>
         <div className="bg-background-secondary p-6 rounded-lg">
           <h2 className="text-2xl font-bold mb-4">{article.title}</h2>
+          <div className="text-sm text-gray-500 mb-4">
+            작성일: {new Date(article.createdAt).toLocaleString()}
+            {article.updatedAt !== article.createdAt && (
+              <> | 수정일: {new Date(article.updatedAt).toLocaleString()}</>
+            )}
+          </div>
           <div className="prose prose-invert max-w-none">
             {article.content}
           </div>
-          {article.relatedArticles.length > 0 && (
-            <div className="mt-8">
-              <h3 className="text-xl font-bold mb-4">연관 게시글</h3>
-              <ul className="space-y-2">
-                {article.relatedArticles.map((relatedId) => {
-                  const relatedArticle = articles.find(
-                    (a) => a.articleId === relatedId
-                  );
-                  return relatedArticle ? (
-                    <li key={relatedId}>
-                      <button
-                        onClick={() => router.push(`/articles/view/${relatedArticle.id}`)}
-                        className="text-accent hover:underline"
-                      >
-                        {relatedArticle.title}
-                      </button>
-                    </li>
-                  ) : null;
-                })}
-              </ul>
-            </div>
-          )}
         </div>
       </div>
     </div>
