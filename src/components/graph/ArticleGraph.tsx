@@ -21,7 +21,7 @@ import { GraphNode, GraphLink, GraphData } from '@/types/article';
 export default function ArticleGraph({ articles, onNodeClick }: ArticleGraphProps) {
   const [graphData, setGraphData] = useState<GraphData>({ nodes: [], links: [] });
   const [isStabilized, setIsStabilized] = useState<boolean>(false);
-  const graphRef = useRef<any>(null);
+  const graphRef = useRef<ForceGraphMethods>(null);
   const prevGraphDataJsonRef = useRef<string>('');
 
   // Convert articles to graph data
@@ -113,7 +113,7 @@ export default function ArticleGraph({ articles, onNodeClick }: ArticleGraphProp
     }
   }, [graphData, isStabilized]);
 
-  const handleNodeClick = (node: any) => {
+  const handleNodeClick = (node: GraphNode) => {
     const article = articles.find(a => a.id === node.id);
     onNodeClick(article || null);
   };
