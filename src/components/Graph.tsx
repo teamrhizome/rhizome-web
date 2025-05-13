@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import { ForceGraphMethods } from 'react-force-graph-2d';
 import { Article, GraphData, GraphNode } from '@/types/article';
 
 const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), {
@@ -15,7 +16,7 @@ interface GraphProps {
 export default function Graph({ onNodeClick }: GraphProps) {
   const [graphData, setGraphData] = useState<GraphData>({ nodes: [], links: [] });
   const [posts, setPosts] = useState<Article[]>([]);
-  const graphRef = useRef<any>(null);
+  const graphRef = useRef<ForceGraphMethods>(null);
 
   // localStorage에서 게시글 데이터 로드
   useEffect(() => {
@@ -95,11 +96,11 @@ export default function Graph({ onNodeClick }: GraphProps) {
         <ForceGraph2D
           ref={graphRef}
           graphData={graphData}
-          nodeLabel={(node: any) => node.title}
-          nodeColor={(node: any) => node.color}
-          nodeVal={(node: any) => node.val}
+          nodeLabel={(node: GraphNode) => node.title}
+          nodeColor={(node: GraphNode) => node.color}
+          nodeVal={(node: GraphNode) => node.val}
           linkColor={() => '#9ca3af'}
-          onNodeClick={(node: any) => handleNodeClick(node as GraphNode)}
+          onNodeClick={(node: GraphNode) => handleNodeClick(node)}
           width={window.innerWidth}
           height={window.innerHeight - 64}
           cooldownTicks={200}
