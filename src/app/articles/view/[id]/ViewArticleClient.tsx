@@ -79,8 +79,26 @@ export default function ViewArticleClient({ id }: Props) {
           <div className="prose prose-invert max-w-none">
             {article.content}
           </div>
+
+          {article.relateArticles && article.relateArticles.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-xl font-bold mb-4">관련 글</h3>
+              <ul className="space-y-2">
+                {article.relateArticles.map((relatedArticle) => (
+                  <li key={relatedArticle.id}>
+                    <button
+                      onClick={() => router.push(`/articles/view/${relatedArticle.id}`)}
+                      className="text-accent hover:underline"
+                    >
+                      {relatedArticle.title}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
-} 
+}

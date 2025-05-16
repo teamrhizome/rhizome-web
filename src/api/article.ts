@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { CreateArticleRequest, AllArticleResponse, ArticleDetailResponse } from '@/types/article';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 export const articleApi = {
   createArticle: async (data: CreateArticleRequest) => {
@@ -18,4 +18,4 @@ export const articleApi = {
     const response = await axios.get<ArticleDetailResponse>(`${API_BASE_URL}/articles/${id}`);
     return response.data;
   },
-}; 
+};
