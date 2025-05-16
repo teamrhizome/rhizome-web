@@ -73,10 +73,11 @@ export interface ArticleDetailResponse {
     content: string;
     createdAt: string;
     updatedAt: string;
+    relateArticles?: ReferenceArticleResponse[];
   };
   error: null | {
     code: string;
     message: string;
     data: Record<string, unknown>;
   };
-} 
+}
