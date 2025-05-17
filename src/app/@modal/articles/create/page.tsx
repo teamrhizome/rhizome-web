@@ -82,19 +82,23 @@ export default function CreateArticleModal() {
 
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">연결할 게시글</label>
-            <select
-              value={selectedArticleId}
-              onChange={handleArticleSelect}
-              className="w-full p-2 rounded bg-background border border-border"
-            >
-              <option value="">게시글 선택</option>
-              {articlesQuery.data?.data?.articles?.map((article) => (
-                <option key={article.id} value={article.id}>
-                  {article.title}
-                </option>
-              ))}
-            </select>
-
+            {articlesQuery.isError ? (
+              <p className="text-red-500">게시글을 불러오는 중 오류가 발생했습니다.</p>
+            ) : (
+              <select
+                value={selectedArticleId}
+                onChange={handleArticleSelect}
+                className="w-full p-2 rounded bg-background border border-border"
+                disabled={articlesQuery.isLoading}
+              >
+                <option value="">게시글 선택</option>
+                {articlesQuery.data?.data?.articles?.map((article) => (
+                  <option key={article.id} value={article.id}>
+                    {article.title}
+                  </option>
+                ))}
+              </select>
+            )}
             {selectedArticleIds.length > 0 && (
               <div className="mt-2">
                 <p className="text-sm font-medium mb-1">선택된 게시글:</p>
