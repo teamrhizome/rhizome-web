@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState} from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { articleApi } from '@/api/article';
 
 export default function CreateArticleModal() {
@@ -10,6 +10,32 @@ export default function CreateArticleModal() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [selectedArticleIds, setSelectedArticleIds] = useState<number[]>([]);
+  const [selectedArticleId, setSelectedArticleId] = useState<number | ''>('');
+
+  // Fetch all articles for the dropdown
+  const articlesQuery = useQuery({
+    queryKey: ['articles'],
+    queryFn: articleApi.getArticles,
+  });
+
+  // Handle article selection from dropdown
+  const handleArticleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value) {
+      const articleId = parseInt(value, 10);
+      // Only add if not already selected
+      if (!selectedArticleIds.includes(articleId)) {
+        setSelectedArticleIds([...selectedArticleIds, articleId]);
+      }
+      // Reset dropdown
+      setSelectedArticleId('');
+    }
+  };
+
+  // Remove article from selected list
+  const removeSelectedArticle = (id: number) => {
+    setSelectedArticleIds(selectedArticleIds.filter(articleId => articleId !== id));
+  };
 
   const createArticleMutation = useMutation({
     mutationFn: articleApi.createArticle,
@@ -52,6 +78,45 @@ export default function CreateArticleModal() {
               className="w-full p-2 rounded bg-background border border-border h-32"
               required
             />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">연결할 게시글</label>
+            <select
+              value={selectedArticleId}
+              onChange={handleArticleSelect}
+              className="w-full p-2 rounded bg-background border border-border"
+            >
+              <option value="">게시글 선택</option>
+              {articlesQuery.data?.data?.articles?.map((article) => (
+                <option key={article.id} value={article.id}>
+                  {article.title}
+                </option>
+              ))}
+            </select>
+
+            {selectedArticleIds.length > 0 && (
+              <div className="mt-2">
+                <p className="text-sm font-medium mb-1">선택된 게시글:</p>
+                <ul className="space-y-1">
+                  {selectedArticleIds.map((id) => {
+                    const article = articlesQuery.data?.data?.articles?.find(a => a.id === id);
+                    return (
+                      <li key={id} className="flex items-center justify-between bg-background/50 p-2 rounded">
+                        <span>{article?.title || `게시글 ${id}`}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeSelectedArticle(id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          삭제
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
           </div>
           <div className="flex justify-end gap-2">
             <button
