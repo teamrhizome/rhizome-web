@@ -7,19 +7,18 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const resolvedParams = await params;
   try {
-    const response = await articleApi.getArticle(params.id);
-    if (response.result === 'SUCCESS') {
-      const article = response.data;
-      return {
-        title: `${article.title} - Rhizome`,
-        description: article.content.substring(0, 160),
-        openGraph: {
-          title: article.title,
-          description: article.content.substring(0, 160),
-        },
-      };
-    }
+    const article = await articleApi.getArticle(resolvedParams.id);
+    const description = article.content ? article.content.substring(0, 160) : '';
+    return {
+      title: `${article.title} - Rhizome`,
+      description,
+      openGraph: {
+        title: article.title,
+        description,
+      },
+    };
   } catch (error) {
     console.error('Failed to fetch article metadata:', error);
   }
@@ -30,6 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function ViewArticlePage({ params }: Props) {
-  return <ViewArticleClient id={params.id} />;
-} 
+export default async function ViewArticlePage({ params }: Props) {
+  const resolvedParams = await params;
+  return <ViewArticleClient id={resolvedParams.id} />;
+}

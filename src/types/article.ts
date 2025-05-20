@@ -65,16 +65,18 @@ export interface AllArticleResponse {
   };
 }
 
+export interface ArticleDetail {
+  id: number;
+  title: string;
+  content: string;
+  createdAt: string;
+  publishedAt: string;
+  relateArticles: ReferenceArticleResponse[];
+}
+
 export interface ArticleDetailResponse {
   result: 'SUCCESS' | 'FAIL';
-  data: {
-    id: number;
-    title: string;
-    content: string;
-    createdAt: string;
-    updatedAt: string;
-    relateArticles?: ReferenceArticleResponse[];
-  };
+  data: ArticleDetail;
   error: null | {
     code: string;
     message: string;

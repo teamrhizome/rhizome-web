@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { articleApi } from '@/api/article';
-import { ArticleDetailResponse } from '@/types/article';
+import { ArticleDetail } from '@/types/article';
 
 interface Props {
   id: string;
@@ -11,16 +11,14 @@ interface Props {
 
 export default function ViewArticleClient({ id }: Props) {
   const router = useRouter();
-  const [article, setArticle] = useState<ArticleDetailResponse['data'] | null>(null);
+  const [article, setArticle] = useState<ArticleDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchArticle = async () => {
       try {
-        const response = await articleApi.getArticle(id);
-        if (response.result === 'SUCCESS') {
-          setArticle(response.data);
-        }
+        const article = await articleApi.getArticle(id);
+        setArticle(article);
       } catch (error) {
         console.error('Failed to fetch article:', error);
       } finally {
@@ -80,8 +78,8 @@ export default function ViewArticleClient({ id }: Props) {
           <h2 className="text-2xl font-bold mb-4">{article.title}</h2>
           <div className="text-sm text-gray-500 mb-4">
             작성일: {new Date(article.createdAt).toLocaleString()}
-            {article.updatedAt !== article.createdAt && (
-              <> | 수정일: {new Date(article.updatedAt).toLocaleString()}</>
+            {article.publishedAt !== article.createdAt && (
+              <> | 발행일: {new Date(article.publishedAt).toLocaleString()}</>
             )}
           </div>
           <div className="prose prose-invert max-w-none">
