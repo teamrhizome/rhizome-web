@@ -16,7 +16,7 @@ export const articleApi = {
 
   getArticle: async (id: string) => {
     const response = await axios.get<ArticleDetailResponse>(`${API_BASE_URL}/articles/${id}`);
-    return response.data;
+    return response.data.data;
   },
 
   updateArticle: async (data: CreateArticleRequest & { id: number }) => {

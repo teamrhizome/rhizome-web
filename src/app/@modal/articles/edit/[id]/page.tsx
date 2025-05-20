@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { articleApi } from '@/api/article';
-import { ArticleDetailResponse } from '@/types/article';
+import { ArticleDetail } from '@/types/article';
 
 interface Props {
   params: { id: string };
@@ -24,13 +24,11 @@ export default function EditArticleModal({ params }: Props) {
   });
 
   // Update form data when article is loaded
-  if (articleQuery.data?.result === 'SUCCESS' && title === '') {
-    const article = articleQuery.data.data;
+  if (articleQuery.data && title === '') {
+    const article = articleQuery.data;
     setTitle(article.title);
     setContent(article.content);
-    if (article.relateArticles) {
-      setSelectedArticleIds(article.relateArticles.map(article => article.id));
-    }
+    setSelectedArticleIds(article.relateArticles.map(article => article.id));
   }
 
   // Fetch all articles for the dropdown
@@ -59,10 +57,7 @@ export default function EditArticleModal({ params }: Props) {
 
   const updateArticleMutation = useMutation({
     mutationFn: (data: { title: string; content: string; relateArticleIds: { articleIds: number[] } }) =>
-      articleApi.updateArticle({
-        ...data,
-        id: parseInt(params.id, 10),
-      }),
+      articleApi.updateArticle(parseInt(params.id, 10), data),
     onSuccess: () => {
       router.back();
     },
