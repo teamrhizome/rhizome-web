@@ -61,12 +61,20 @@ export default function ViewArticleClient({ id }: Props) {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Rhizome</h1>
-          <button
-            onClick={() => router.back()}
-            className="px-4 py-2 bg-accent text-white rounded-md hover:bg-accent/90"
-          >
-            돌아가기
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => router.push(`/articles/edit/${id}?modal=true`)}
+              className="px-4 py-2 bg-accent text-white rounded-md hover:bg-accent/90"
+            >
+              수정하기
+            </button>
+            <button
+              onClick={() => router.back()}
+              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+            >
+              돌아가기
+            </button>
+          </div>
         </div>
         <div className="bg-background-secondary p-6 rounded-lg">
           <h2 className="text-2xl font-bold mb-4">{article.title}</h2>
@@ -83,18 +91,17 @@ export default function ViewArticleClient({ id }: Props) {
           {article.relateArticles && article.relateArticles.length > 0 && (
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4">관련 글</h3>
-              <ul className="space-y-2">
-                {article.relateArticles.map((relatedArticle) => (
-                  <li key={relatedArticle.id}>
-                    <button
-                      onClick={() => router.push(`/articles/view/${relatedArticle.id}`)}
-                      className="text-accent hover:underline"
-                    >
-                      {relatedArticle.title}
-                    </button>
-                  </li>
+              <div className="flex flex-wrap gap-2">
+                {article.relateArticles.map(relatedArticle => (
+                  <button
+                    key={relatedArticle.id}
+                    onClick={() => router.push(`/articles/view/${relatedArticle.id}`)}
+                    className="bg-background px-3 py-1 rounded-full hover:bg-background/80 transition-colors"
+                  >
+                    {relatedArticle.title}
+                  </button>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
         </div>
